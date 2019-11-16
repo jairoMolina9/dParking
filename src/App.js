@@ -5,9 +5,11 @@ import {
   UserSession,
   AppConfig
 } from 'blockstack';
+import { Switch, Route } from 'react-router-dom'
 
-const appConfig = new AppConfig()
+const appConfig = new AppConfig(['store_write', 'publish_data'])
 const userSession = new UserSession({ appConfig: appConfig })
+
 
 export default class App extends Component {
 
@@ -28,7 +30,19 @@ export default class App extends Component {
         <div className="site-wrapper-inner">
           { !userSession.isUserSignedIn() ?
             <Signin userSession={userSession} handleSignIn={ this.handleSignIn } />
-            : <Profile userSession={userSession} handleSignOut={ this.handleSignOut } />
+            : <Switch>
+            <Route
+              path='/:username?'
+              render={
+                routeProps => 
+                  <Profile 
+                    userSession={userSession} 
+                    handleSignOut={ this.handleSignOut } 
+                    {...routeProps} 
+                  />
+              }
+            />
+          </Switch>
           }
 
         </div>

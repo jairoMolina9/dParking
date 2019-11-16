@@ -3,7 +3,9 @@ import GoogleMapReact from 'google-map-react';
 
 import {
   Person,
+  lookupProfile
 } from 'blockstack';
+import QR from './Qrcode';
 import {
   Drawer,
   Button,
@@ -19,11 +21,15 @@ const format = 'HH:mm';
 const avatarFallbackImage = 'https://s3.amazonaws.com/onename/avatar-placeholder.png';
 const AnyReactComponent = ({ text }) => <div>{text}</div>;
 
+
 export default class Profile extends Component {
   constructor(props) {
   	super(props);
 
   	this.state = {
+      latitude: null,
+      longitude: null,
+
   	  person: {
   	  	name() {
           return 'Anonymous';
@@ -31,17 +37,39 @@ export default class Profile extends Component {
   	  	avatarUrl() {
   	  	  return avatarFallbackImage;
   	  	},
-  	  },
+      },
+      username: "",
       visible: false,
-      placement: 'bottom'
+      placement: 'bottom',
+      visibleQR: false, // for qr code
+      summaryVisible: false,
+      value: null,
+      open: false
   	};
     this.showDrawer = this.showDrawer.bind(this);
     this.onClose = this.onClose.bind(this);
   }
 
+  handleOpenChange = open => {
+   this.setState({ open });
+  };
+
+  handleClose = () => this.setState({ open: false });
+
+  onChange = time => {
+    console.log(time);
+    this.setState({ value: time });
+  };
+
   showDrawer = () => {
     this.setState({
       visible: true,
+    });
+  };
+
+  showSummaryDrawer = () => {
+    this.setState({
+      summaryVisible: true,
     });
   };
 
@@ -50,6 +78,28 @@ export default class Profile extends Component {
       visible: false,
     });
   };
+  // begin of QRcode
+  // for showing QR code
+  showQR = () => {
+    this.setState({
+      visibleQR: true,
+    });
+  };
+  // close the QRcode
+  handleOkQR = e => {
+    console.log(e);
+    this.setState({
+      visibleQR: false,
+    });
+  };
+  // close the QR code
+  handleCancelQR = e => {
+    console.log(e);
+    this.setState({
+      visibleQR: false,
+    });
+  };
+  // end of QRcode
 
   static defaultProps = {
     center: {
@@ -59,9 +109,33 @@ export default class Profile extends Component {
     zoom: 11
   };
 
+componentWillMount() {
+  const { userSession } = this.props;
+  this.setState({
+    person: new Person(userSession.loadUserData().profile),
+    username: userSession.loadUserData().username
+  });
+
+    navigator.geolocation.getCurrentPosition(
+      position => {
+        var crd = position.coords;
+
+        this.setState({
+          latitude: crd.latitude,
+          longitude: crd.longitude
+        });
+
+        console.log(this.state.latitude, this.state.longitude)
+      },
+      error => console.warn(`ERROR(${error.code}): ${error.message}`),
+      { enableHighAccuracy: true, timeout: 5000, maximumAge: 0 }
+    );
+}
   render() {
+    console.log("first");
     const { handleSignOut, userSession } = this.props;
-    const { person } = this.state;
+    const { person, username } = this.state;
+    console.log(username);
     const { Search } = Input;
     return (
       !userSession.isSignInPending() ?
@@ -69,6 +143,7 @@ export default class Profile extends Component {
         <div className="avatar-section">
           <img src={ person.avatarUrl() ? person.avatarUrl() : avatarFallbackImage } className="img-rounded avatar" id="avatar-image" alt=""/>
         </div>
+        
         <h1>Hello, <span id="heading-name">{ person.name() ? person.name() : 'Nameless Person' }</span>!</h1>
         <p className="lead">
           <button
@@ -77,18 +152,26 @@ export default class Profile extends Component {
             onClick={ handleSignOut.bind(this) }
           >
             Logout
+            
           </button>
+          <QR 
+              userId={username}
+              visibleQR={this.state.visibleQR}
+              showModal={this.showQR}
+              handleOkQR={this.handleOkQR}
+              handleCancelQR={this.handleCancelQR} 
+            />
         </p>
         <div style={{ height: '100vh', width: '100%' }}>
           <GoogleMapReact
             bootstrapURLKeys={{ key: 'AIzaSyCpj8L3lbWNzrkw4-1csPoc26g1wnoP_4A' }}
-            defaultCenter={this.props.center}
-            defaultZoom={this.props.zoom}
+            defaultCenter={{lat: this.state.latitude, lng: this.state.longitude}}
+            defaultZoom={16}
           >
             <AnyReactComponent
-              lat={59.955413}
-              lng={30.337844}
-              text="userprofilename"
+              lat={this.state.latitude}
+              lng={this.state.longitude}
+              text="markpoint"
             />
           </GoogleMapReact>
         </div>
@@ -120,16 +203,103 @@ export default class Profile extends Component {
           onClose={this.onClose}
           visible={this.state.visible}
         >
-          <TimePicker defaultValue={moment('00:00', format)} format={format} minuteStep={10} size="large" />
+          <TimePicker
+            defaultOpenValue={moment('00:00:00', 'HH:mm:ss')}
+            value={this.state.value}
+            onChange={this.onChange}
+            defaultValue={moment('00:00', format)}
+            format={format} minuteStep={10}
+            size="large"
+            open={this.state.open}
+            onOpenChange={this.handleOpenChange}
+            addon={() => (
+              <Button size="small" type="primary" onClick={this.handleClose}>
+                Ok
+              </Button>
+            )}
+          />
+          <br />
+          <br />
+          <br />
+          <button
+                className="btn btn-primary btn-lg"
+                id="signout-button"
+                onClick={this.showSummaryDrawer}
+              >
+                Next
+              </button>
+        </Drawer>
+        <Drawer
+          title="Summary"
+          placement={this.state.placement}
+          closable={false}
+          onClose={this.onClose}
+          visible={this.state.summaryVisible}
+        >
+
+          summaryDrawer
         </Drawer>
       </div> : null
     );
   }
 
-  componentWillMount() {
-    const { userSession } = this.props;
-    this.setState({
-      person: new Person(userSession.loadUserData().profile),
-    });
+  
+  componentDidMount() {
+    this.fetchData()
   }
+  // for fetching data
+  fetchData() {
+    const { userSession } = this.props
+    this.setState({ isLoading: true })
+    if (this.isLocal()) {
+      const options = { decrypt: false }
+      userSession.getFile('statuses.json', options)
+        .then((file) => {
+          var statuses = JSON.parse(file || '[]')
+          this.setState({
+            person: new Person(userSession.loadUserData().profile),
+            username: userSession.loadUserData().username,
+            statusIndex: statuses.length,
+            statuses: statuses,
+          })
+        })
+        .finally(() => {
+          this.setState({ isLoading: false })
+        })
+    } else {
+      const username = this.props.match.params.username
+
+      lookupProfile(username)
+        .then((profile) => {
+          this.setState({
+            person: new Person(profile),
+            username: username
+          })
+        })
+        .catch((error) => {
+          console.log('could not resolve profile')
+        })
+      const options = { username: username, decrypt: false }
+      userSession.getFile('statuses.json', options)
+        .then((file) => {
+          var statuses = JSON.parse(file || '[]')
+          this.setState({
+            statusIndex: statuses.length,
+            statuses: statuses
+          })
+        })
+        .catch((error) => {
+          console.log('could not fetch statuses')
+        })
+        .finally(() => {
+          this.setState({ isLoading: false })
+        })
+    }
+
+  }
+  // for verifying if this is "checking valid parking page"?
+  isLocal() {
+    return this.props.match.params.username ? false : true
+  }
+
 }
