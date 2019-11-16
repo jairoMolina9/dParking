@@ -322,18 +322,25 @@ componentWillMount() {
   isLocal() {
     return this.props.match.params.username ? false : true
   }
-
+  
   // for sending the data
   sendData = (data) => {
+    var currentdate = new Date(); 
+    var datetime = (currentdate.getMonth()+1) + "/"
+                + currentdate.getDate()  + "/" 
+                + currentdate.getFullYear() + " @ "  
+                + currentdate.getHours() + ":"  
+                + currentdate.getMinutes() + ":" 
+                + currentdate.getSeconds();
     const { userSession } = this.props
     let transactions = this.state.transactions
 
     let transaction = {
       id: this.state.transactionIndex++,
-      created_at: Date.now(),
-      duration: (((moment.duration(moment(this.state.value._d).format("HH:mm"))).asMinutes() / 10) * .5).toFixed(2)
+      created_at: datetime,
+      duration: (((moment.duration(moment(this.state.value._d).format("HH:mm"))).asMinutes() / 10) * .5).toFixed(2),
       // address:
-      // price?
+      price: (((moment.duration(moment(this.state.value._d).format("HH:mm"))).asMinutes() / 10) * .5).toFixed(2) 
       // TODO need modify this depend on the information that we want to store
     }
     console.log("herere");
