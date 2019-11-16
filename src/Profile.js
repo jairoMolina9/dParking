@@ -58,7 +58,7 @@ componentWillMount() {
       <GoogleMapReact
         bootstrapURLKeys={{ key: 'AIzaSyCpj8L3lbWNzrkw4-1csPoc26g1wnoP_4A' }}
         defaultCenter={{lat: this.state.latitude, lng: this.state.longitude}}
-        defaultZoom={11}
+        defaultZoom={16}
       >
         <AnyReactComponent
           lat={this.state.latitude}
