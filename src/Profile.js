@@ -141,9 +141,27 @@ export default class Profile extends Component {
       anchor: new window.google.maps.Point(0, 0) // anchor
     };
     let parking = new maps.Marker({
+      position: {lat:40.872133, lng:-73.896822},
+      map,
+      title: 'Opened 12:12 pm',
+      icon: parkingIMG,
+      animation:window.google.maps.Animation.BOUNCE
+
+    });
+
+    let parking1 = new maps.Marker({
+      position: {lat:40.869912, lng:-73.893915},
+      map,
+      title: 'Opened 12:10 pm',
+      icon: parkingIMG,
+      animation:window.google.maps.Animation.BOUNCE
+
+    });
+
+    let parking2 = new maps.Marker({
       position: {lat:40.871851, lng:-73.891480},
       map,
-      title: 'Parking location',
+      title: 'Opened 12:20 pm',
       icon: parkingIMG,
       animation:window.google.maps.Animation.BOUNCE
 
@@ -159,8 +177,10 @@ export default class Profile extends Component {
 
   });
 
-  setTimeout(function(){ parking.setAnimation(null); }, 1200);
-  setTimeout(function(){ user.setAnimation(null); }, 1200);
+  setTimeout(function(){ parking.setAnimation(null); }, 2000);
+  setTimeout(function(){ parking1.setAnimation(null); }, 2000);
+  setTimeout(function(){ parking2.setAnimation(null); }, 2000);
+  setTimeout(function(){ user.setAnimation(null); }, 2000);
   }
   render() {
     console.log("first");
@@ -267,13 +287,13 @@ export default class Profile extends Component {
           height={320}
         >
           <List
-            bordered 
+            bordered
           >
             <List.Item><strong>Address:</strong>  </List.Item>
             <List.Item><strong>Duration:</strong> {this.state.summaryVisible ? moment(this.state.value._d).format("HH:mm") : ''} </List.Item>
             <List.Item><strong>Price:</strong> ${this.state.summaryVisible ? (((moment.duration(moment(this.state.value._d).format("HH:mm"))).asMinutes() / 10) * .5).toFixed(2) : ''}</List.Item>
           </List>
-          <br /> 
+          <br />
           <button
             className="btn btn-primary btn-lg"
             id="signout-button"
@@ -346,15 +366,15 @@ export default class Profile extends Component {
   isLocal() {
     return this.props.match.params.username ? false : true
   }
-  
+
   // for sending the data
   sendData = (data) => {
-    var currentdate = new Date(); 
+    var currentdate = new Date();
     var datetime = (currentdate.getMonth()+1) + "/"
-                + currentdate.getDate()  + "/" 
-                + currentdate.getFullYear() + " @ "  
-                + currentdate.getHours() + ":"  
-                + currentdate.getMinutes() + ":" 
+                + currentdate.getDate()  + "/"
+                + currentdate.getFullYear() + " @ "
+                + currentdate.getHours() + ":"
+                + currentdate.getMinutes() + ":"
                 + currentdate.getSeconds();
     const { userSession } = this.props
     let transactions = this.state.transactions
@@ -365,7 +385,7 @@ export default class Profile extends Component {
       duration: (((moment.duration(moment(this.state.value._d).format("HH:mm"))).asMinutes() / 10) * .5).toFixed(2),
       longitude: this.state.longitude,
       latitude: this.state.latitude,
-      price: (((moment.duration(moment(this.state.value._d).format("HH:mm"))).asMinutes() / 10) * .5).toFixed(2) 
+      price: (((moment.duration(moment(this.state.value._d).format("HH:mm"))).asMinutes() / 10) * .5).toFixed(2)
       // TODO need modify this depend on the information that we want to store
     }
     console.log("herere");
