@@ -33,7 +33,8 @@ export default class Profile extends Component {
   	  	},
   	  },
       visible: false,
-      placement: 'bottom'
+      placement: 'bottom',
+      summaryVisible: false,
   	};
     this.showDrawer = this.showDrawer.bind(this);
     this.onClose = this.onClose.bind(this);
@@ -42,6 +43,12 @@ export default class Profile extends Component {
   showDrawer = () => {
     this.setState({
       visible: true,
+    });
+  };
+
+  showSummaryDrawer = () => {
+    this.setState({
+      summaryVisible: true,
     });
   };
 
@@ -121,6 +128,26 @@ export default class Profile extends Component {
           visible={this.state.visible}
         >
           <TimePicker defaultValue={moment('00:00', format)} format={format} minuteStep={10} size="large" />
+          <br />
+          <br />
+          <br />
+          <button
+                className="btn btn-primary btn-lg"
+                id="signout-button"
+                onClick={this.showSummaryDrawer}
+              >
+                Next
+              </button>
+        </Drawer>
+        <Drawer
+          title="Summary"
+          placement={this.state.placement}
+          closable={false}
+          onClose={this.onClose}
+          visible={this.state.summaryVisible}
+        >
+          
+          summaryDrawer
         </Drawer>
       </div> : null
     );
