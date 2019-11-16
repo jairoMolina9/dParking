@@ -16,6 +16,7 @@ import {
   TimePicker
 } from 'antd';
 import moment from 'moment';
+import CheckingValidParking from './ValidParking';
 
 const format = 'HH:mm';
 const avatarFallbackImage = 'https://s3.amazonaws.com/onename/avatar-placeholder.png';

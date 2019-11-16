@@ -2,7 +2,7 @@
 // TODO
 import React from 'react'
 
-export default function ValidParking() {
+export default function ValidParking(props) {
     return (
         <div>
             
