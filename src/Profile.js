@@ -152,7 +152,7 @@ componentWillMount() {
           onClose={this.onClose}
           visible={this.state.visible}
         >
-          <TimePicker defaultValue={moment('00:00', format)} format={format} minuteStep={10} size="large" />
+          <TimePicker defaultOpenValue={moment('00:00:00', 'HH:mm:ss')} format={format} minuteStep={10} size="large" />
           <br />
           <br />
           <br />
