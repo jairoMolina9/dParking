@@ -1,9 +1,12 @@
-import React, { Component } from 'react';
+import React, {Component} from 'react';
+import GoogleMapReact from 'google-map-react';
+
 import {
   Person,
 } from 'blockstack';
 
 const avatarFallbackImage = 'https://s3.amazonaws.com/onename/avatar-placeholder.png';
+const AnyReactComponent = ({ text }) => <div>{text}</div>;
 
 export default class Profile extends Component {
   constructor(props) {
@@ -21,26 +24,31 @@ export default class Profile extends Component {
   	};
   }
 
+  static defaultProps = {
+  center: {
+    lat: 59.95,
+    lng: 30.33
+  },
+  zoom: 11
+};
+
   render() {
     const { handleSignOut, userSession } = this.props;
     const { person } = this.state;
     return (
-      !userSession.isSignInPending() ?
-      <div className="panel-welcome" id="section-2">
-        <div className="avatar-section">
-          <img src={ person.avatarUrl() ? person.avatarUrl() : avatarFallbackImage } className="img-rounded avatar" id="avatar-image" alt=""/>
-        </div>
-        <h1>Hello, <span id="heading-name">{ person.name() ? person.name() : 'Nameless Person' }</span>!</h1>
-        <p className="lead">
-          <button
-            className="btn btn-primary btn-lg"
-            id="signout-button"
-            onClick={ handleSignOut.bind(this) }
-          >
-            Logout
-          </button>
-        </p>
-      </div> : null
+      <div style={{ height: '100vh', width: '100%' }}>
+      <GoogleMapReact
+        bootstrapURLKeys={{ key: 'AIzaSyCpj8L3lbWNzrkw4-1csPoc26g1wnoP_4A' }}
+        defaultCenter={this.props.center}
+        defaultZoom={this.props.zoom}
+      >
+        <AnyReactComponent
+          lat={59.955413}
+          lng={30.337844}
+          text="userprofilename"
+        />
+      </GoogleMapReact>
+    </div>
     );
   }
 

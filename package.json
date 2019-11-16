@@ -13,8 +13,11 @@
   "license": "MIT",
   "dependencies": {
     "blockstack": "^19.2.5",
+    "google-map-react": "^1.1.5",
     "react": "^16.8.6",
     "react-dom": "^16.8.6",
+    "react-native-maps": "^0.26.1",
+    "react-navigation": "^4.0.10",
     "react-router-dom": "^4.3.1",
     "react-scripts": "3.0.1"
   },
