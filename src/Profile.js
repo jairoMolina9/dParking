@@ -203,10 +203,8 @@ componentWillMount() {
           onClose={this.onClose}
           visible={this.state.visible}
         >
-<<<<<<< HEAD
-          <TimePicker defaultOpenValue={moment('00:00:00', 'HH:mm:ss')} format={format} minuteStep={10} size="large" />
-=======
           <TimePicker
+            defaultOpenValue={moment('00:00:00', 'HH:mm:ss')}
             value={this.state.value}
             onChange={this.onChange}
             defaultValue={moment('00:00', format)}
@@ -220,7 +218,6 @@ componentWillMount() {
               </Button>
             )}
           />
->>>>>>> 2627575da94c2f43096f017d65f349e1f62e0f15
           <br />
           <br />
           <br />
