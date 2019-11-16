@@ -24,7 +24,7 @@ const avatarFallbackImage = 'https://s3.amazonaws.com/onename/avatar-placeholder
 const AnyReactComponent = ({ text }) => <div>{text}</div>;
 
 
-export default class Profile extends Component {
+class Profile extends Component {
   constructor(props) {
   	super(props);
 
@@ -267,13 +267,13 @@ export default class Profile extends Component {
           height={320}
         >
           <List
-            bordered 
+            bordered
           >
             <List.Item><strong>Address:</strong>  </List.Item>
             <List.Item><strong>Duration:</strong> {this.state.summaryVisible ? moment(this.state.value._d).format("HH:mm") : ''} </List.Item>
             <List.Item><strong>Price:</strong> ${this.state.summaryVisible ? (((moment.duration(moment(this.state.value._d).format("HH:mm"))).asMinutes() / 10) * .5).toFixed(2) : ''}</List.Item>
           </List>
-          <br /> 
+          <br />
           <button
             className="btn btn-primary btn-lg"
             id="signout-button"
@@ -346,15 +346,15 @@ export default class Profile extends Component {
   isLocal() {
     return this.props.match.params.username ? false : true
   }
-  
+
   // for sending the data
   sendData = (data) => {
-    var currentdate = new Date(); 
+    var currentdate = new Date();
     var datetime = (currentdate.getMonth()+1) + "/"
-                + currentdate.getDate()  + "/" 
-                + currentdate.getFullYear() + " @ "  
-                + currentdate.getHours() + ":"  
-                + currentdate.getMinutes() + ":" 
+                + currentdate.getDate()  + "/"
+                + currentdate.getFullYear() + " @ "
+                + currentdate.getHours() + ":"
+                + currentdate.getMinutes() + ":"
                 + currentdate.getSeconds();
     const { userSession } = this.props
     let transactions = this.state.transactions
@@ -365,7 +365,7 @@ export default class Profile extends Component {
       duration: (((moment.duration(moment(this.state.value._d).format("HH:mm"))).asMinutes() / 10) * .5).toFixed(2),
       longitude: this.state.longitude,
       latitude: this.state.latitude,
-      price: (((moment.duration(moment(this.state.value._d).format("HH:mm"))).asMinutes() / 10) * .5).toFixed(2) 
+      price: (((moment.duration(moment(this.state.value._d).format("HH:mm"))).asMinutes() / 10) * .5).toFixed(2)
       // TODO need modify this depend on the information that we want to store
     }
     console.log("herere");
@@ -383,3 +383,4 @@ export default class Profile extends Component {
   }
 
 }
+ export { Profile };
