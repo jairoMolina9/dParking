@@ -11,6 +11,8 @@ export default function ValidParking(props) {
         return (
             <div style={{ background: '#ECECEC', padding: '30px' }} key={transaction.id}>
                 <Card title={`Date: ${transaction.created_at}`} bordered={false} style={{ width: 300 }}>
+                    <p>{`longitude: ${transaction.longitude}`}</p>
+                    <p>{`latitude: ${transaction.latitude}`}</p>
                     <p>{`Duration: ${transaction.duration}`}</p>
                     <p>{`Paid Amount: ${transaction.price}`}</p>
                 </Card>

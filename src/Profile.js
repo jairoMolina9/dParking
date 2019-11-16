@@ -1,6 +1,6 @@
 import React, {Component} from 'react';
-import GoogleMapReact from 'google-map-react';
-
+import GoogleMap from 'google-map-react';
+import Marker from 'google-maps-react';
 import {
   Person,
   lookupProfile
@@ -105,36 +105,63 @@ export default class Profile extends Component {
   };
   // end of QRcode
 
-  static defaultProps = {
-    center: {
-      lat: 59.95,
-      lng: 30.33
-    },
-    zoom: 11
-  };
+  componentWillMount() {
+    const { userSession } = this.props;
+    this.setState({
+      person: new Person(userSession.loadUserData().profile),
+    });
 
-componentWillMount() {
-  const { userSession } = this.props;
-  this.setState({
-    person: new Person(userSession.loadUserData().profile),
-    username: userSession.loadUserData().username
+      navigator.geolocation.getCurrentPosition(
+        position => {
+          var crd = position.coords;
+
+          this.setState({
+            latitude: crd.latitude,
+            longitude: crd.longitude
+          });
+
+          console.log(this.state.latitude, this.state.longitude)
+        },
+        error => console.warn(`ERROR(${error.code}): ${error.message}`),
+        { enableHighAccuracy: true, timeout: 5000, maximumAge: 0 }
+      );
+  }
+  renderMarkers(map, maps){
+    var parkingIMG = {
+      url: "parking.png", // url
+      scaledSize: new window.google.maps.Size(30, 30), // scaled size
+      origin: new window.google.maps.Point(0,0), // origin
+      anchor: new window.google.maps.Point(0, 0) // anchor
+    };
+
+    var carIMG = {
+      url: "rsz_car1.png", // url
+      scaledSize: new window.google.maps.Size(60, 60), // scaled size
+      origin: new window.google.maps.Point(0,0), // origin
+      anchor: new window.google.maps.Point(0, 0) // anchor
+    };
+    let parking = new maps.Marker({
+      position: {lat:40.871851, lng:-73.891480},
+      map,
+      title: 'Parking location',
+      icon: parkingIMG,
+      animation:window.google.maps.Animation.BOUNCE
+
+    });
+
+    let user = new maps.Marker({
+      position: {lat:this.state.latitude, lng:this.state.longitude},
+      map,
+      title: 'Car location',
+      icon: carIMG,
+      animation: window.google.maps.Animation.BOUNCE,
+
+
   });
 
-    navigator.geolocation.getCurrentPosition(
-      position => {
-        var crd = position.coords;
-
-        this.setState({
-          latitude: crd.latitude,
-          longitude: crd.longitude
-        });
-
-        console.log(this.state.latitude, this.state.longitude)
-      },
-      error => console.warn(`ERROR(${error.code}): ${error.message}`),
-      { enableHighAccuracy: true, timeout: 5000, maximumAge: 0 }
-    );
-}
+  setTimeout(function(){ parking.setAnimation(null); }, 1200);
+  setTimeout(function(){ user.setAnimation(null); }, 1200);
+  }
   render() {
     console.log("first");
     const { handleSignOut, userSession } = this.props;
@@ -148,7 +175,7 @@ componentWillMount() {
         <div className="avatar-section">
           <img src={ person.avatarUrl() ? person.avatarUrl() : avatarFallbackImage } className="img-rounded avatar" id="avatar-image" alt=""/>
         </div>
-        
+
         <h1>Hello, <span id="heading-name">{ person.name() ? person.name() : 'Nameless Person' }</span>!</h1>
         <p className="lead">
           <button
@@ -157,29 +184,26 @@ componentWillMount() {
             onClick={ handleSignOut.bind(this) }
           >
             Logout
-            
+
           </button>
-          <QR 
+          <QR
               userId={username}
               visibleQR={this.state.visibleQR}
               showModal={this.showQR}
               handleOkQR={this.handleOkQR}
-              handleCancelQR={this.handleCancelQR} 
+              handleCancelQR={this.handleCancelQR}
             />
         </p>
         <div style={{ height: '100vh', width: '100%' }}>
-          <GoogleMapReact
-            bootstrapURLKeys={{ key: 'AIzaSyCpj8L3lbWNzrkw4-1csPoc26g1wnoP_4A' }}
-            defaultCenter={{lat: this.state.latitude, lng: this.state.longitude}}
-            defaultZoom={16}
-          >
-            <AnyReactComponent
-              lat={this.state.latitude}
-              lng={this.state.longitude}
-              text="markpoint"
-            />
-          </GoogleMapReact>
-        </div>
+
+             <GoogleMap
+               defaultCenter={{lat: this.state.latitude, lng: this.state.longitude}}
+               defaultZoom={16}
+               onGoogleApiLoaded={({map, maps}) => this.renderMarkers(map, maps)}
+               yesIWantToUseGoogleMapApiInternals
+             >
+             </GoogleMap>
+           </div>
         <Row>
           <Col span={24}>
             <Card title={`Hello, ${person.name() ? person.name() : 'Nameless Person'}`} bordered={false}>
@@ -264,7 +288,7 @@ componentWillMount() {
     );
   }
 
-  
+
   componentDidMount() {
     this.fetchData()
   }
@@ -339,7 +363,8 @@ componentWillMount() {
       id: this.state.transactionIndex++,
       created_at: datetime,
       duration: (((moment.duration(moment(this.state.value._d).format("HH:mm"))).asMinutes() / 10) * .5).toFixed(2),
-      // address:
+      longitude: this.state.longitude,
+      latitude: this.state.latitude,
       price: (((moment.duration(moment(this.state.value._d).format("HH:mm"))).asMinutes() / 10) * .5).toFixed(2) 
       // TODO need modify this depend on the information that we want to store
     }
