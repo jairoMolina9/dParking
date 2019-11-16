@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import Profile from './Profile.js';
 import Signin from './Signin.js';
+import Home from './Home';
 import {
   UserSession,
   AppConfig

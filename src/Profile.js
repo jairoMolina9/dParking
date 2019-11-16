@@ -13,9 +13,11 @@ import {
   Row,
   Col,
   Input,
-  TimePicker
+  TimePicker,
+  List
 } from 'antd';
 import moment from 'moment';
+import CheckingValidParking from './ValidParking';
 
 const format = 'HH:mm';
 const avatarFallbackImage = 'https://s3.amazonaws.com/onename/avatar-placeholder.png';
@@ -44,7 +46,9 @@ export default class Profile extends Component {
       visibleQR: false, // for qr code
       summaryVisible: false,
       value: null,
-      open: false
+      open: false,
+      transactions: [], // all the parking transactinos
+      transactionIndex: 0, // index for transaction to prevent warning when doing mapping
   	};
     this.showDrawer = this.showDrawer.bind(this);
     this.onClose = this.onClose.bind(this);
@@ -166,6 +170,7 @@ export default class Profile extends Component {
     const { Search } = Input;
     return (
       !userSession.isSignInPending() ?
+      this.isLocal() && !this.isLoading ?
       <div className="panel-welcome" id="section-2">
         <div className="avatar-section">
           <img src={ person.avatarUrl() ? person.avatarUrl() : avatarFallbackImage } className="img-rounded avatar" id="avatar-image" alt=""/>
@@ -259,11 +264,27 @@ export default class Profile extends Component {
           closable={false}
           onClose={this.onClose}
           visible={this.state.summaryVisible}
+          height={320}
         >
-
-          summaryDrawer
+          <List
+            bordered 
+          >
+            <List.Item><strong>Address:</strong>  </List.Item>
+            <List.Item><strong>Duration:</strong> {this.state.summaryVisible ? moment(this.state.value._d).format("HH:mm") : ''} </List.Item>
+            <List.Item><strong>Price:</strong> ${this.state.summaryVisible ? (((moment.duration(moment(this.state.value._d).format("HH:mm"))).asMinutes() / 10) * .5).toFixed(2) : ''}</List.Item>
+          </List>
+          <br /> 
+          <button
+            className="btn btn-primary btn-lg"
+            id="signout-button"
+            onClick={this.sendData}
+          >
+            Confirm Parking
+          </button>
         </Drawer>
-      </div> : null
+      </div> :
+      <CheckingValidParking transactions={this.state.transactions}/>
+      : null
     );
   }
 
@@ -277,14 +298,14 @@ export default class Profile extends Component {
     this.setState({ isLoading: true })
     if (this.isLocal()) {
       const options = { decrypt: false }
-      userSession.getFile('statuses.json', options)
+      userSession.getFile('transactions.json', options)
         .then((file) => {
-          var statuses = JSON.parse(file || '[]')
+          var transactions = JSON.parse(file || '[]')
           this.setState({
             person: new Person(userSession.loadUserData().profile),
             username: userSession.loadUserData().username,
-            statusIndex: statuses.length,
-            statuses: statuses,
+            transactionIndex: transactions.length,
+            transactions: transactions,
           })
         })
         .finally(() => {
@@ -304,12 +325,12 @@ export default class Profile extends Component {
           console.log('could not resolve profile')
         })
       const options = { username: username, decrypt: false }
-      userSession.getFile('statuses.json', options)
+      userSession.getFile('transactions.json', options)
         .then((file) => {
-          var statuses = JSON.parse(file || '[]')
+          var transactions = JSON.parse(file || '[]')
           this.setState({
-            statusIndex: statuses.length,
-            statuses: statuses
+            transactionIndex: transactions.length,
+            transactions: transactions
           })
         })
         .catch((error) => {
@@ -324,6 +345,41 @@ export default class Profile extends Component {
   // for verifying if this is "checking valid parking page"?
   isLocal() {
     return this.props.match.params.username ? false : true
+  }
+  
+  // for sending the data
+  sendData = (data) => {
+    var currentdate = new Date(); 
+    var datetime = (currentdate.getMonth()+1) + "/"
+                + currentdate.getDate()  + "/" 
+                + currentdate.getFullYear() + " @ "  
+                + currentdate.getHours() + ":"  
+                + currentdate.getMinutes() + ":" 
+                + currentdate.getSeconds();
+    const { userSession } = this.props
+    let transactions = this.state.transactions
+
+    let transaction = {
+      id: this.state.transactionIndex++,
+      created_at: datetime,
+      duration: (((moment.duration(moment(this.state.value._d).format("HH:mm"))).asMinutes() / 10) * .5).toFixed(2),
+      longitude: this.state.longitude,
+      latitude: this.state.latitude,
+      price: (((moment.duration(moment(this.state.value._d).format("HH:mm"))).asMinutes() / 10) * .5).toFixed(2) 
+      // TODO need modify this depend on the information that we want to store
+    }
+    console.log("herere");
+
+    transactions.unshift(transaction)
+    const options = { encrypt: false }
+    userSession.putFile('transactions.json', JSON.stringify(transactions), options)
+      .then(() => {
+        this.setState({
+          transactions: transactions,
+          summaryVisible: false,
+          visible: false
+        })
+      })
   }
 
 }
