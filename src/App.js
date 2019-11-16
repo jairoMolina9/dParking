@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import Profile from './Profile.js';
+import {Profile} from './Profile.js';
 import Signin from './Signin.js';
 import Home from './Home';
 import {
@@ -10,7 +10,6 @@ import { Switch, Route } from 'react-router-dom'
 
 const appConfig = new AppConfig(['store_write', 'publish_data'])
 const userSession = new UserSession({ appConfig: appConfig })
-
 
 export default class App extends Component {
 
@@ -35,11 +34,11 @@ export default class App extends Component {
             <Route
               path='/:username?'
               render={
-                routeProps => 
-                  <Profile 
-                    userSession={userSession} 
-                    handleSignOut={ this.handleSignOut } 
-                    {...routeProps} 
+                routeProps =>
+                  <Profile
+                    userSession={userSession}
+                    handleSignOut={ this.handleSignOut }
+                    {...routeProps}
                   />
               }
             />

@@ -24,7 +24,7 @@ const avatarFallbackImage = 'https://s3.amazonaws.com/onename/avatar-placeholder
 const AnyReactComponent = ({ text }) => <div>{text}</div>;
 
 
-export default class Profile extends Component {
+class Profile extends Component {
   constructor(props) {
   	super(props);
 
@@ -351,3 +351,4 @@ componentWillMount() {
   }
 
 }
+ export { Profile };
