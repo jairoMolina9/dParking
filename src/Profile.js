@@ -3,7 +3,9 @@ import GoogleMapReact from 'google-map-react';
 
 import {
   Person,
+  lookupProfile
 } from 'blockstack';
+import QR from './Qrcode';
 import {
   Drawer,
   Button,
@@ -18,6 +20,7 @@ import moment from 'moment';
 const format = 'HH:mm';
 const avatarFallbackImage = 'https://s3.amazonaws.com/onename/avatar-placeholder.png';
 const AnyReactComponent = ({ text }) => <div>{text}</div>;
+
 
 export default class Profile extends Component {
   constructor(props) {
@@ -34,9 +37,11 @@ export default class Profile extends Component {
   	  	avatarUrl() {
   	  	  return avatarFallbackImage;
   	  	},
-  	  },
+      },
+      username: "",
       visible: false,
       placement: 'bottom',
+      visibleQR: false, // for qr code
       summaryVisible: false,
   	};
     this.showDrawer = this.showDrawer.bind(this);
@@ -60,6 +65,28 @@ export default class Profile extends Component {
       visible: false,
     });
   };
+  // begin of QRcode
+  // for showing QR code
+  showQR = () => {
+    this.setState({
+      visibleQR: true,
+    });
+  };
+  // close the QRcode
+  handleOkQR = e => {
+    console.log(e);
+    this.setState({
+      visibleQR: false,
+    });
+  };
+  // close the QR code
+  handleCancelQR = e => {
+    console.log(e);
+    this.setState({
+      visibleQR: false,
+    });
+  };
+  // end of QRcode
 
   static defaultProps = {
     center: {
@@ -73,6 +100,7 @@ componentWillMount() {
   const { userSession } = this.props;
   this.setState({
     person: new Person(userSession.loadUserData().profile),
+    username: userSession.loadUserData().username
   });
 
     navigator.geolocation.getCurrentPosition(
@@ -93,7 +121,8 @@ componentWillMount() {
   render() {
     console.log("first");
     const { handleSignOut, userSession } = this.props;
-    const { person } = this.state;
+    const { person, username } = this.state;
+    console.log(username);
     const { Search } = Input;
     return (
       !userSession.isSignInPending() ?
@@ -101,6 +130,7 @@ componentWillMount() {
         <div className="avatar-section">
           <img src={ person.avatarUrl() ? person.avatarUrl() : avatarFallbackImage } className="img-rounded avatar" id="avatar-image" alt=""/>
         </div>
+        
         <h1>Hello, <span id="heading-name">{ person.name() ? person.name() : 'Nameless Person' }</span>!</h1>
         <p className="lead">
           <button
@@ -109,7 +139,15 @@ componentWillMount() {
             onClick={ handleSignOut.bind(this) }
           >
             Logout
+            
           </button>
+          <QR 
+              userId={username}
+              visibleQR={this.state.visibleQR}
+              showModal={this.showQR}
+              handleOkQR={this.handleOkQR}
+              handleCancelQR={this.handleCancelQR} 
+            />
         </p>
         <div style={{ height: '100vh', width: '100%' }}>
           <GoogleMapReact
@@ -178,5 +216,63 @@ componentWillMount() {
     );
   }
 
+  
+  componentDidMount() {
+    this.fetchData()
+  }
+  // for fetching data
+  fetchData() {
+    const { userSession } = this.props
+    this.setState({ isLoading: true })
+    if (this.isLocal()) {
+      const options = { decrypt: false }
+      userSession.getFile('statuses.json', options)
+        .then((file) => {
+          var statuses = JSON.parse(file || '[]')
+          this.setState({
+            person: new Person(userSession.loadUserData().profile),
+            username: userSession.loadUserData().username,
+            statusIndex: statuses.length,
+            statuses: statuses,
+          })
+        })
+        .finally(() => {
+          this.setState({ isLoading: false })
+        })
+    } else {
+      const username = this.props.match.params.username
+
+      lookupProfile(username)
+        .then((profile) => {
+          this.setState({
+            person: new Person(profile),
+            username: username
+          })
+        })
+        .catch((error) => {
+          console.log('could not resolve profile')
+        })
+      const options = { username: username, decrypt: false }
+      userSession.getFile('statuses.json', options)
+        .then((file) => {
+          var statuses = JSON.parse(file || '[]')
+          this.setState({
+            statusIndex: statuses.length,
+            statuses: statuses
+          })
+        })
+        .catch((error) => {
+          console.log('could not fetch statuses')
+        })
+        .finally(() => {
+          this.setState({ isLoading: false })
+        })
+    }
+
+  }
+  // for verifying if this is "checking valid parking page"?
+  isLocal() {
+    return this.props.match.params.username ? false : true
+  }
 
 }
