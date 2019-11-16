@@ -13,7 +13,8 @@ import {
   Row,
   Col,
   Input,
-  TimePicker
+  TimePicker,
+  List
 } from 'antd';
 import moment from 'moment';
 
@@ -236,9 +237,22 @@ componentWillMount() {
           closable={false}
           onClose={this.onClose}
           visible={this.state.summaryVisible}
+          height={320}
         >
-
-          summaryDrawer
+          <List
+            bordered
+          >
+            <List.Item><strong>Address:</strong>  </List.Item>
+            <List.Item><strong>Duration:</strong> {this.state.summaryVisible ? moment(this.state.value._d).format("HH:mm") : ''} </List.Item>
+            <List.Item><strong>Price:</strong> ${this.state.summaryVisible ? (((moment.duration(moment(this.state.value._d).format("HH:mm"))).asMinutes() / 10) * .5).toFixed(2) : ''}</List.Item>
+          </List>
+          <br />
+          <button
+            className="btn btn-primary btn-lg"
+            id="signout-button"
+          >
+            Confirm Parking
+          </button>
         </Drawer>
       </div> : null
     );
