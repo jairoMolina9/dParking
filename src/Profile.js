@@ -3,6 +3,7 @@ import GoogleMapReact from 'google-map-react';
 
 import {
   Person,
+  lookupProfile
 } from 'blockstack';
 import QR from './Qrcode';
 import {
@@ -19,6 +20,7 @@ import moment from 'moment';
 const format = 'HH:mm';
 const avatarFallbackImage = 'https://s3.amazonaws.com/onename/avatar-placeholder.png';
 const AnyReactComponent = ({ text }) => <div>{text}</div>;
+
 
 export default class Profile extends Component {
   constructor(props) {
@@ -167,5 +169,62 @@ export default class Profile extends Component {
       person: new Person(userSession.loadUserData().profile),
       username: userSession.loadUserData().username
     });
+  }
+  componentDidMount() {
+    this.fetchData()
+  }
+  // for fetching data
+  fetchData() {
+    const { userSession } = this.props
+    this.setState({ isLoading: true })
+    if (this.isLocal()) {
+      const options = { decrypt: false }
+      userSession.getFile('statuses.json', options)
+        .then((file) => {
+          var statuses = JSON.parse(file || '[]')
+          this.setState({
+            person: new Person(userSession.loadUserData().profile),
+            username: userSession.loadUserData().username,
+            statusIndex: statuses.length,
+            statuses: statuses,
+          })
+        })
+        .finally(() => {
+          this.setState({ isLoading: false })
+        })
+    } else {
+      const username = this.props.match.params.username
+
+      lookupProfile(username)
+        .then((profile) => {
+          this.setState({
+            person: new Person(profile),
+            username: username
+          })
+        })
+        .catch((error) => {
+          console.log('could not resolve profile')
+        })
+      const options = { username: username, decrypt: false }
+      userSession.getFile('statuses.json', options)
+        .then((file) => {
+          var statuses = JSON.parse(file || '[]')
+          this.setState({
+            statusIndex: statuses.length,
+            statuses: statuses
+          })
+        })
+        .catch((error) => {
+          console.log('could not fetch statuses')
+        })
+        .finally(() => {
+          this.setState({ isLoading: false })
+        })
+    }
+
+  }
+  // for verifying if this is "checking valid parking page"?
+  isLocal() {
+    return this.props.match.params.username ? false : true
   }
 }
