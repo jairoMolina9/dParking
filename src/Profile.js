@@ -59,6 +59,7 @@ export default class Profile extends Component {
   onChange = time => {
     console.log(time);
     this.setState({ value: time });
+    console.log(time._d);
   };
 
   showDrawer = () => {
@@ -143,7 +144,7 @@ componentWillMount() {
         <div className="avatar-section">
           <img src={ person.avatarUrl() ? person.avatarUrl() : avatarFallbackImage } className="img-rounded avatar" id="avatar-image" alt=""/>
         </div>
-        
+
         <h1>Hello, <span id="heading-name">{ person.name() ? person.name() : 'Nameless Person' }</span>!</h1>
         <p className="lead">
           <button
@@ -152,14 +153,14 @@ componentWillMount() {
             onClick={ handleSignOut.bind(this) }
           >
             Logout
-            
+
           </button>
-          <QR 
+          <QR
               userId={username}
               visibleQR={this.state.visibleQR}
               showModal={this.showQR}
               handleOkQR={this.handleOkQR}
-              handleCancelQR={this.handleCancelQR} 
+              handleCancelQR={this.handleCancelQR}
             />
         </p>
         <div style={{ height: '100vh', width: '100%' }}>
@@ -243,7 +244,7 @@ componentWillMount() {
     );
   }
 
-  
+
   componentDidMount() {
     this.fetchData()
   }
