@@ -100,6 +100,7 @@ componentWillMount() {
   const { userSession } = this.props;
   this.setState({
     person: new Person(userSession.loadUserData().profile),
+    username: userSession.loadUserData().username
   });
 
     navigator.geolocation.getCurrentPosition(
@@ -215,13 +216,7 @@ componentWillMount() {
     );
   }
 
-  componentWillMount() {
-    const { userSession } = this.props;
-    this.setState({
-      person: new Person(userSession.loadUserData().profile),
-      username: userSession.loadUserData().username
-    });
-  }
+  
   componentDidMount() {
     this.fetchData()
   }
