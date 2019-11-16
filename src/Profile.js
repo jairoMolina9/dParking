@@ -38,10 +38,23 @@ export default class Profile extends Component {
       visible: false,
       placement: 'bottom',
       summaryVisible: false,
+      value: null,
+      open: false
   	};
     this.showDrawer = this.showDrawer.bind(this);
     this.onClose = this.onClose.bind(this);
   }
+
+  handleOpenChange = open => {
+   this.setState({ open });
+  };
+
+  handleClose = () => this.setState({ open: false });
+
+  onChange = time => {
+    console.log(time);
+    this.setState({ value: time });
+  };
 
   showDrawer = () => {
     this.setState({
@@ -152,7 +165,20 @@ componentWillMount() {
           onClose={this.onClose}
           visible={this.state.visible}
         >
-          <TimePicker defaultValue={moment('00:00', format)} format={format} minuteStep={10} size="large" />
+          <TimePicker
+            value={this.state.value}
+            onChange={this.onChange}
+            defaultValue={moment('00:00', format)}
+            format={format} minuteStep={10}
+            size="large"
+            open={this.state.open}
+            onOpenChange={this.handleOpenChange}
+            addon={() => (
+              <Button size="small" type="primary" onClick={this.handleClose}>
+                Ok
+              </Button>
+            )}
+          />
           <br />
           <br />
           <br />
