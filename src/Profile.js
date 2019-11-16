@@ -45,7 +45,9 @@ export default class Profile extends Component {
       visibleQR: false, // for qr code
       summaryVisible: false,
       value: null,
-      open: false
+      open: false,
+      transactions: [], // all the parking transactinos
+      transactionIndex: 0, // index for transaction to prevent warning when doing mapping
   	};
     this.showDrawer = this.showDrawer.bind(this);
     this.onClose = this.onClose.bind(this);
@@ -140,6 +142,7 @@ componentWillMount() {
     const { Search } = Input;
     return (
       !userSession.isSignInPending() ?
+      this.isLocal() && !this.isLoading ?
       <div className="panel-welcome" id="section-2">
         <div className="avatar-section">
           <img src={ person.avatarUrl() ? person.avatarUrl() : avatarFallbackImage } className="img-rounded avatar" id="avatar-image" alt=""/>
@@ -240,7 +243,9 @@ componentWillMount() {
 
           summaryDrawer
         </Drawer>
-      </div> : null
+      </div> :
+      <CheckingValidParking transactions={this.state.transactions}/>
+      : null
     );
   }
 
@@ -254,14 +259,14 @@ componentWillMount() {
     this.setState({ isLoading: true })
     if (this.isLocal()) {
       const options = { decrypt: false }
-      userSession.getFile('statuses.json', options)
+      userSession.getFile('transactions.json', options)
         .then((file) => {
-          var statuses = JSON.parse(file || '[]')
+          var transactions = JSON.parse(file || '[]')
           this.setState({
             person: new Person(userSession.loadUserData().profile),
             username: userSession.loadUserData().username,
-            statusIndex: statuses.length,
-            statuses: statuses,
+            transactionIndex: transactions.length,
+            transactions: transactions,
           })
         })
         .finally(() => {
@@ -281,12 +286,12 @@ componentWillMount() {
           console.log('could not resolve profile')
         })
       const options = { username: username, decrypt: false }
-      userSession.getFile('statuses.json', options)
+      userSession.getFile('transactions.json', options)
         .then((file) => {
-          var statuses = JSON.parse(file || '[]')
+          var transactions = JSON.parse(file || '[]')
           this.setState({
-            statusIndex: statuses.length,
-            statuses: statuses
+            transactionIndex: transactions.length,
+            transactions: transactions
           })
         })
         .catch((error) => {
@@ -301,6 +306,28 @@ componentWillMount() {
   // for verifying if this is "checking valid parking page"?
   isLocal() {
     return this.props.match.params.username ? false : true
+  }
+
+  // for sending the data
+  sendData(data) {
+    const { userSession } = this.props
+    let transactions = this.state.transactions
+
+    let transaction = {
+      id: this.state.transactionIndex++,
+      created_at: Date.now(),
+      //duration: duration
+      // TODO need modify this depend on the information that we want to store
+    }
+
+    transactions.unshift(transaction)
+    const options = { encrypt: false }
+    userSession.putFile('transactions.json', JSON.stringify(transactions), options)
+      .then(() => {
+        this.setState({
+          transactions: transactions
+        })
+      })
   }
 
 }
