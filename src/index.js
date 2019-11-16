@@ -7,4 +7,7 @@ import App from './App.js';
 import 'bootstrap/dist/css/bootstrap.css';
 import'./styles/style.css';
 
+// antd
+import 'antd/dist/antd.css';
+
 ReactDOM.render(<BrowserRouter><App /></BrowserRouter>, document.getElementById('root'));

@@ -30,6 +30,7 @@ export default class App extends Component {
             <Signin userSession={userSession} handleSignIn={ this.handleSignIn } />
             : <Profile userSession={userSession} handleSignOut={ this.handleSignOut } />
           }
+
         </div>
       </div>
     );
