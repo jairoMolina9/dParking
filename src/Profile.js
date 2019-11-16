@@ -27,6 +27,9 @@ export default class Profile extends Component {
   	super(props);
 
   	this.state = {
+      latitude: null,
+      longitude: null,
+
   	  person: {
   	  	name() {
           return 'Anonymous';
@@ -39,6 +42,7 @@ export default class Profile extends Component {
       visible: false,
       placement: 'bottom',
       visibleQR: false, // for qr code
+      summaryVisible: false,
   	};
     this.showDrawer = this.showDrawer.bind(this);
     this.onClose = this.onClose.bind(this);
@@ -47,6 +51,12 @@ export default class Profile extends Component {
   showDrawer = () => {
     this.setState({
       visible: true,
+    });
+  };
+
+  showSummaryDrawer = () => {
+    this.setState({
+      summaryVisible: true,
     });
   };
 
@@ -86,7 +96,29 @@ export default class Profile extends Component {
     zoom: 11
   };
 
+componentWillMount() {
+  const { userSession } = this.props;
+  this.setState({
+    person: new Person(userSession.loadUserData().profile),
+  });
+
+    navigator.geolocation.getCurrentPosition(
+      position => {
+        var crd = position.coords;
+
+        this.setState({
+          latitude: crd.latitude,
+          longitude: crd.longitude
+        });
+
+        console.log(this.state.latitude, this.state.longitude)
+      },
+      error => console.warn(`ERROR(${error.code}): ${error.message}`),
+      { enableHighAccuracy: true, timeout: 5000, maximumAge: 0 }
+    );
+}
   render() {
+    console.log("first");
     const { handleSignOut, userSession } = this.props;
     const { person, username } = this.state;
     console.log(username);
@@ -119,13 +151,13 @@ export default class Profile extends Component {
         <div style={{ height: '100vh', width: '100%' }}>
           <GoogleMapReact
             bootstrapURLKeys={{ key: 'AIzaSyCpj8L3lbWNzrkw4-1csPoc26g1wnoP_4A' }}
-            defaultCenter={this.props.center}
-            defaultZoom={this.props.zoom}
+            defaultCenter={{lat: this.state.latitude, lng: this.state.longitude}}
+            defaultZoom={16}
           >
             <AnyReactComponent
-              lat={59.955413}
-              lng={30.337844}
-              text="userprofilename"
+              lat={this.state.latitude}
+              lng={this.state.longitude}
+              text="markpoint"
             />
           </GoogleMapReact>
         </div>
@@ -158,6 +190,26 @@ export default class Profile extends Component {
           visible={this.state.visible}
         >
           <TimePicker defaultValue={moment('00:00', format)} format={format} minuteStep={10} size="large" />
+          <br />
+          <br />
+          <br />
+          <button
+                className="btn btn-primary btn-lg"
+                id="signout-button"
+                onClick={this.showSummaryDrawer}
+              >
+                Next
+              </button>
+        </Drawer>
+        <Drawer
+          title="Summary"
+          placement={this.state.placement}
+          closable={false}
+          onClose={this.onClose}
+          visible={this.state.summaryVisible}
+        >
+
+          summaryDrawer
         </Drawer>
       </div> : null
     );
@@ -227,4 +279,5 @@ export default class Profile extends Component {
   isLocal() {
     return this.props.match.params.username ? false : true
   }
+
 }
