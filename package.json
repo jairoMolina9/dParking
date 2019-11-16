@@ -9,6 +9,10 @@
   "bugs": {
     "url": "https://github.com/blockstack/hello-blockstack/issues"
   },
+  "engines": {
+    "npm": "6.9.0",
+    "node": "10.16.3"
+  },
   "author": "",
   "license": "MIT",
   "dependencies": {

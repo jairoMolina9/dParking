@@ -35,7 +35,8 @@ export default class Profile extends Component {
       },
       username: "",
       visible: false,
-      placement: 'bottom'
+      placement: 'bottom',
+      visibleQR: false, // for qr code
   	};
     this.showDrawer = this.showDrawer.bind(this);
     this.onClose = this.onClose.bind(this);
@@ -52,6 +53,28 @@ export default class Profile extends Component {
       visible: false,
     });
   };
+  // begin of QRcode
+  // for showing QR code
+  showQR = () => {
+    this.setState({
+      visibleQR: true,
+    });
+  };
+  // close the QRcode
+  handleOkQR = e => {
+    console.log(e);
+    this.setState({
+      visibleQR: false,
+    });
+  };
+  // close the QR code
+  handleCancelQR = e => {
+    console.log(e);
+    this.setState({
+      visibleQR: false,
+    });
+  };
+  // end of QRcode
 
   static defaultProps = {
     center: {
@@ -72,7 +95,7 @@ export default class Profile extends Component {
         <div className="avatar-section">
           <img src={ person.avatarUrl() ? person.avatarUrl() : avatarFallbackImage } className="img-rounded avatar" id="avatar-image" alt=""/>
         </div>
-        <QR userId={username} />
+        
         <h1>Hello, <span id="heading-name">{ person.name() ? person.name() : 'Nameless Person' }</span>!</h1>
         <p className="lead">
           <button
@@ -81,7 +104,15 @@ export default class Profile extends Component {
             onClick={ handleSignOut.bind(this) }
           >
             Logout
+            
           </button>
+          <QR 
+              userId={username}
+              visibleQR={this.state.visibleQR}
+              showModal={this.showQR}
+              handleOkQR={this.handleOkQR}
+              handleCancelQR={this.handleCancelQR} 
+            />
         </p>
         <div style={{ height: '100vh', width: '100%' }}>
           <GoogleMapReact
