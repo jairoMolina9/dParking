@@ -253,6 +253,7 @@ componentWillMount() {
           <button
             className="btn btn-primary btn-lg"
             id="signout-button"
+            onClick={this.sendData}
           >
             Confirm Parking
           </button>
@@ -323,23 +324,28 @@ componentWillMount() {
   }
 
   // for sending the data
-  sendData(data) {
+  sendData = (data) => {
     const { userSession } = this.props
     let transactions = this.state.transactions
 
     let transaction = {
       id: this.state.transactionIndex++,
       created_at: Date.now(),
-      //duration: duration
+      duration: (((moment.duration(moment(this.state.value._d).format("HH:mm"))).asMinutes() / 10) * .5).toFixed(2)
+      // address:
+      // price?
       // TODO need modify this depend on the information that we want to store
     }
+    console.log("herere");
 
     transactions.unshift(transaction)
     const options = { encrypt: false }
     userSession.putFile('transactions.json', JSON.stringify(transactions), options)
       .then(() => {
         this.setState({
-          transactions: transactions
+          transactions: transactions,
+          summaryVisible: false,
+          visible: false
         })
       })
   }
